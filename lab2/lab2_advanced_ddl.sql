@@ -1,6 +1,6 @@
 -- task 1.1
 CREATE DATABASE university_main
-    OWNER = "postgres"
+    OWNER "postgres"
     TEMPLATE = template0
     ENCODING = 'UTF8';
 
@@ -17,7 +17,7 @@ CREATE TABLESPACE student_data
     LOCATION '/data/students';
 
 CREATE TABLESPACE course_data
-    OWNER postgres
+    OWNER "postgres"
     LOCATION '/data/courses';
 
 CREATE DATABASE university_distributed
@@ -47,7 +47,7 @@ CREATE TABLE professors (
     hire_date DATE,
     salary DECIMAL(10, 2),
     is_tenured BOOLEAN,
-    years_experience INTEGER
+    years_experience INT
 );
 
 CREATE TABLE courses (
@@ -56,18 +56,17 @@ CREATE TABLE courses (
     course_title VARCHAR(100),
     description TEXT,
     credits SMALLINT,
-    max_enrollment INTEGER,
+    max_enrollment INT,
     course_fee DECIMAL(8, 2),
     is_online BOOLEAN,
     created_at TIMESTAMP WITHOUT TIME ZONE
 );
 
 -- task 2.2
-
 CREATE TABLE class_schedule (
     schedule_id SERIAL PRIMARY KEY,
-    course_id INTEGER,
-    professor_id INTEGER,
+    course_id INT,
+    professor_id INT,
     classroom VARCHAR(20),
     class_date DATE,
     start_time TIME WITHOUT TIME ZONE,
@@ -77,16 +76,15 @@ CREATE TABLE class_schedule (
 
 CREATE TABLE student_records (
     record_id SERIAL PRIMARY KEY,
-    student_id INTEGER,
-    course_id INTEGER,
+    student_id INT,
+    course_id INT,
     semester VARCHAR(20),
-    year INTEGER,
+    year INT,
     grade CHAR(2),
     attendance_percentage DECIMAL(4, 1),
     submission_timestamp TIMESTAMP WITH TIME ZONE,
     last_updated TIMESTAMP WITH TIME ZONE
 );
-
 -- task 3.1
 ALTER TABLE students
     ADD COLUMN middle_name VARCHAR(30),
@@ -116,7 +114,7 @@ ALTER TABLE professors
 
 
 ALTER TABLE courses
-    ADD COLUMN prerequisite_course_id INTEGER,
+    ADD COLUMN prerequisite_course_id INT,
     ADD COLUMN difficulty_level SMALLINT;
 
 ALTER TABLE courses
@@ -133,7 +131,7 @@ ALTER TABLE courses
 -- task3.2
 
 ALTER TABLE class_schedule
-    ADD COLUMN room_capacity INTEGER,
+    ADD COLUMN room_capacity INT,
     DROP COLUMN duration,
     ADD COLUMN session_type VARCHAR(15),
     ADD COLUMN equipment_needed TEXT;
@@ -166,7 +164,7 @@ CREATE TABLE departments (
     building VARCHAR(50),
     phone VARCHAR(15),
     budget DECIMAL(12, 2),
-    established_year INTEGER
+    established_year INT
 );
 
 CREATE TABLE library_books (
@@ -183,8 +181,8 @@ CREATE TABLE library_books (
 
 CREATE TABLE student_book_loans (
     loan_id SERIAL PRIMARY KEY,
-    student_id INTEGER,
-    book_id INTEGER,
+    student_id INT,
+    book_id INT,
     loan_date DATE,
     due_date DATE,
     return_date DATE,
@@ -204,7 +202,7 @@ CREATE TABLE grade_scale (
 CREATE TABLE semester_calendar (
     semester_id SERIAL PRIMARY KEY,
     semester_name VARCHAR(20),
-    academic_year INTEGER,
+    academic_year INT,
     start_date DATE,
     end_date DATE,
     registration_deadline TIMESTAMP WITH TIME ZONE,
@@ -213,13 +211,13 @@ CREATE TABLE semester_calendar (
 
 -- task 4.2
 ALTER TABLE professors
-    ADD COLUMN department_id INTEGER;
+    ADD COLUMN department_id INT;
 
 ALTER TABLE students
-    ADD COLUMN advisor_id INTEGER;
+    ADD COLUMN advisor_id INT;
 
 ALTER TABLE courses
-    ADD COLUMN department_id INTEGER;
+    ADD COLUMN department_id INT;
 
 
 -- task 5.1
@@ -243,7 +241,7 @@ DROP TABLE IF EXISTS semester_calendar CASCADE;
 CREATE TABLE semester_calendar (
     semester_id SERIAL PRIMARY KEY,
     semester_name VARCHAR(20),
-    academic_year INTEGER,
+    academic_year INT,
     start_date DATE,
     end_date DATE,
     registration_deadline TIMESTAMP WITH TIME ZONE,
@@ -256,3 +254,61 @@ DROP DATABASE IF EXISTS university_distributed;
 
 CREATE DATABASE university_backup
     TEMPLATE university_main;
+
+
+-- #################################################
+-- TASK DURING THE LESSON start time
+
+
+CREATE DATABASE library_system
+    CONNECTION LIMIT = 75;
+
+CREATE TABLESPACE digital_content
+    LOCATION '/storage/ebooks';
+
+CREATE TABLE book_catalog(
+    catalog_id SERIAL PRIMARY KEY,
+    isbn CHAR(13),
+    book_title VARCHAR(150),
+    author_name VARCHAR(100),
+    publisher VARCHAR(80),
+    publication_year SMALLINT,
+    total_pages INT,
+    book_format CHAR(10),
+    purchase_price DECIMAL(5,2),
+    is_available BOOLEAN
+);
+
+CREATE TABLE digital_downloads
+(
+    download_id SERIAL PRIMARY KEY,
+    user_id     INT,
+    catalog_id  INT,
+    download_timestamp TIMESTAMP WITH TIME ZONE,
+    file_format VARCHAR(10),
+    file_size_mb REAL,
+    download_completed BOOLEAN,
+    expiry_date DATE,
+    access_count SMALLINT
+);
+
+ALTER TABLE book_catalog
+    ADD COLUMN genre VARCHAR(50),
+    ADD COLUMN library_section CHAR(3),
+    ALTER COLUMN genre SET DEFAULT 'UNKNOWN';
+
+ALTER TABLE digital_downloads
+    ADD COLUMN device_type VARCHAR(30),
+    ADD COLUMN file_size_mb INT,
+    ADD COLUMN last_accessed TIME WITH TIME ZONE
+;
+
+CREATE TABLE reading_sessions(
+    Session_ID SERIAL PRIMARY KEY,
+    User_Reference INT,
+    Book_Rrference INT,
+    Session_Start TIME WITH TIME ZONE,
+    Reading_DUration INTERVAL,
+    Pages_Read SMALLINT,
+    Session_Active BOOLEAN
+);
