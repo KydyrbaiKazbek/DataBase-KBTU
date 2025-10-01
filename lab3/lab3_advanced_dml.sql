@@ -33,8 +33,8 @@ VALUES (1, 'Kazybek', 'Kydyrbay', 'IT'),
        (3, 'Michel', 'Jackson', 'Music Production');
 
 -- 3 Inserting default data
-INSERT INTO employees (emp_id,first_name, last_name, hire_date, salary, status)
-VALUES ( 4,'Jane', 'Smith', '2008-07-08', DEFAULT, DEFAULT);
+INSERT INTO employees (first_name, last_name, hire_date, salary, status)
+VALUES ('Jane', 'Smith', '2008-07-08', DEFAULT, DEFAULT);
 
 -- 4 Multi-inserting into Departments
 INSERT INTO departments (dept_name, budget, manager_id)
@@ -176,4 +176,56 @@ WHERE p.budget > 50000 AND (
 
 
 
+--TASK DURING THE CLASS
 
+CREATE TABLE product(
+    product_id SERIAL PRIMARY KEY,
+    product_name VARCHAR(255),
+    category VARCHAR(255),
+    price DECIMAL(8, 2),
+    stock_quantity INT,
+    supplier_id INT
+);
+
+CREATE TABLE suppliers(
+    supplier_id SERIAL PRIMARY KEY,
+    supplier_name VARCHAR(255),
+    contact_email VARCHAR(255),
+    active_status BOOLEAN
+);
+
+INSERT INTO product(product_name, category, price, stock_quantity, supplier_id)
+VALUES ('Wireless Mouse', 'Electronics', 25.99, 50, 3);
+
+INSERT INTO suppliers(supplier_name, contact_email, active_status)
+VALUES ('Tech Supliers Co', 'tech@suppliers.com', true),
+       ('Office Direct', 'info@officedirect.com', true);
+
+INSERT INTO product (product_name, category, price, stock_quantity, supplier_id)
+VALUES ('USB Cable', 'Accessories', 15.50*1.2, 100, 2);
+
+--B part
+UPDATE product SET price = price*1.15 WHERE category = 'Electronics';
+
+UPDATE product
+SET category =
+    CASE
+        WHEN stock_quantity > 100 THEN 'Overstock'
+        WHEN stock_quantity BETWEEN 20 AND 100 THEN 'Regular'
+        ELSE 'LowStock'
+    END;
+
+UPDATE product
+SET  price = price*1.5, stock_quantity = stock_quantity+20 WHERE price < 10;
+
+-- C partt
+
+DELETE FROM product WHERE stock_quantity=0 AND price > 50;
+
+DELETE FROM suppliers WHERE supplier_id NOT IN (SELECT DISTINCT supplier_id FROM product WHERE supplier_id IS NOT NULL);
+
+-- Pard D
+INSERT INTO product (product_name, category, price, stock_quantity, supplier_id)
+VALUES ('Mystery Item', NULL, NULL, 10, 1);
+
+UPDATE product  SET price = 99.99 WHERE category IS NULL RETURNING product_id, product_name;
