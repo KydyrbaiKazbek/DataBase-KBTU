@@ -243,3 +243,110 @@ SELECT
     GREATEST(ds.max_salary, 70000) as max_salary_comparison
 FROM DepartmentStats ds
 JOIN HighestPaid hp ON ds.department = hp.department AND hp.rn = 1;
+
+
+
+-- TASK DURING THE CLASS
+
+CREATE TABLE products(
+     product_id SERIAL PRIMARY KEY,
+     product_name VARCHAR(50),
+     category VARCHAR(50),
+     unit_price NUMERIC(10,2),
+     stock_level INT,
+    supplier_name VARCHAR(50),
+    rating INT
+);
+
+CREATE TABLE customers(
+    customer_id SERIAL PRIMARY KEY,
+    username VARCHAR(50),
+    email VARCHAR(50),
+    join_date DATE,
+    loyalty_points INT,
+        preferred_payment VARCHAR(50),
+    city VARCHAR(50)
+);
+
+CREATE Table sales(
+    sale_id SERIAL Primary Key,
+    customer_id INT,
+    product_id INT,
+    sale_date DATE,
+    quantity_sold INT,
+    discount_applied INT
+);
+
+
+SELECT LOWER(product_name), category || ' (Category)', RIGHT(supplier_name, 3)
+FROM products;
+
+SELECT
+    product_name,
+    rating,
+    CASE
+        WHEN rating >= 4.5 THEN 'Top Rated'
+        WHEN rating BETWEEN 3.0 AND 4.5 THEN 'Good'
+        ELSE 'Poor'
+    END AS rating_class
+FROM products;
+
+SELECT *
+FROM customers
+WHERE username LIKE '%123' OR username LIKE '%456';
+
+SELECT *
+FROM products
+WHERE stock_level < 20 AND unit_price > 50;
+
+SELECT
+    s.sale_id,
+    p.unit_price * s.quantity_sold * (1 - s.discount_applied / 100.0) AS final_price
+FROM sales s
+JOIN products p ON s.product_id = p.product_id;
+
+SELECT *
+FROM customers
+WHERE join_date > '2023-01-01' OR loyalty_points > 1000;
+
+SELECT *
+FROM sales
+WHERE discount_applied BETWEEN 10 AND 30;
+
+SELECT
+    category,
+    COUNT(product_id) AS product_count
+FROM products
+GROUP BY category;
+
+SELECT
+    city,
+    AVG(loyalty_points) AS avg_loyalty
+FROM customers
+GROUP BY city
+HAVING AVG(loyalty_points) > 500;
+
+SELECT
+    product_id,
+    SUM(quantity_sold) AS total_quantity_sold
+FROM sales
+GROUP BY product_id;
+
+SELECT
+    supplier_name,
+    MIN(unit_price) AS min_price,
+    MAX(unit_price) AS max_price
+FROM products
+GROUP BY supplier_name;
+-- D
+SELECT
+    product_id,
+    product_name
+FROM products p
+WHERE EXISTS (
+    SELECT 1 FROM sales s WHERE s.product_id = p.product_id
+);
+
+SELECT *
+FROM customers
+WHERE loyalty_points < ALL (SELECT loyalty_points FROM customers WHERE city == 'Seattle');
