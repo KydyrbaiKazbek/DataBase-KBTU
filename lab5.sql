@@ -274,8 +274,8 @@ CREATE TABLE products_ecommerce (
     product_id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     description TEXT,
-    price NUMERIC NOT NULL CHECK (price >= 0), -- Цена не может быть отрицательной
-    stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0) -- Количество не может быть отрицательным
+    price NUMERIC NOT NULL CHECK (price >= 0),
+    stock_quantity INTEGER NOT NULL CHECK (stock_quantity >= 0)
 );
 
 -- 3. Table orders
@@ -346,3 +346,119 @@ INSERT INTO order_details_ecommerce (order_id, product_id, quantity, unit_price)
 -- 5. error CHECK (quantity)
 -- INSERT INTO order_details_ecommerce (order_id, product_id, quantity, unit_price) VALUES (2, 3, 0, 150.00);
 -- Результат: Ошибка, так как количество должно быть больше 0.
+
+
+
+
+
+-- TASK DURING THE CLASS
+-- Task1
+create table theaters (
+    theater_id integer, PRIMARY KEY,
+    theater_name text NOT NULL UNIQUE,
+    location text NOT NULL,
+    total_screens integer, NOT NULL check (  total_screens>=1 and total_screens<=30)
+);
+
+create table screeens(
+    screen_id integer PRIMARY KEY,
+    theater_id integer UNIQUE  REFERENCES theaters ON DELETE CASCADE,
+    screen_number integer UNIQUE,
+    seating_capacity integer NOT NULL check(seating_capacity>=50 and seating_capacity<=100),
+    screen_type text NOT NULL check (screen_type in ('standard', 'imax', '3d', '4dx'))
+);
+
+INSERT INTO theaters VALUES
+(1, 'Name1', 'Almaty', 8),
+(2, 'Name2', 'Astana', 5);
+
+INSERT INTO screens VALUES 
+(101, 1, 1, 200, 'imax'),
+(102, 1, 2, 150, '3d'),
+(103, 1, 3, 150, 'standard');
+
+--Error 1 duplicate screen_number
+INSERT INTO screens VALUES (104, 1, 1, 100, 'standard');
+-- Error 2 seating_capacity > 500
+INSERT INTO screens VALUES (105, 1, 4, 600, 'standard');
+
+
+
+--Task 2
+
+CREATE TABLE movies (
+    movie_id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
+    genre TEXT NOT NULL CHECK (genre IN ('action', 'comedy', 'drama', 'horror', 'scifi', 'romance', 'thriller')),
+    duration_minutes INTEGER NOT NULL CHECK (duration_minutes >= 60 AND duration_minutes <= 300),
+    rating TEXT NOT NULL CHECK (rating IN ('G', 'PG', 'PG-13', 'R', 'NC-17')),
+    release_date DATE NOT NULL,
+    director TEXT NOT NULL,
+    language TEXT NOT NULL DEFAULT 'English',
+    CHECK (release_date > '1900-01-01'),
+    UNIQUE (title, release_date, director)
+);
+
+-- Q_test
+    
+INSERT INTO movies VALUES 
+(1, 'titie', 'scifi', 80, 'PG-13', '2010-07-16', 'Christopher Nolan'),
+(2, 'title2', 'action', 150, 'PG-13', '2010-07-16', 'Christopher Nolan'),
+(3, 'title', 'thriller', 130, 'R', '2019-10-11', 'Bong Joon Ho', 'Korean'),
+(4, 'tiewea', 'romance', 120, 'R', '2001-11-02', 'Jean-Pierre Jeunet', 'French');
+
+-- Errors:
+INSERT INTO movies VALUES (5, 'Avatar 2', 'scifi', 400, 'PG-13', '2022-12-16', 'James Cameron'); -- duration_minutes > 300
+INSERT INTO movies VALUES (6, 'Joker', 'drama', 122, 'PG-15', '2019-10-04', 'Todd Phillips'); -- invalid rating
+INSERT INTO movies VALUES (7, 'Inception', 'scifi', 148, 'PG-13', '2010-07-16', 'Christopher Nolan'); -- duplicate movie
+-- Correct
+INSERT INTO movies VALUES (8, 'Dune', 'scifi', 155, 'PG-13', '2021-10-22', 'Denis Villeneuve'); -- SUCCEEDS (remake of old movie)
+
+
+--Task3
+
+CREATE TABLE showtimes(
+    showtime_id INTEGER PRIMARY KEY,
+    movie_id INTEGER NOT NULL REFERENCES movies(movie_id) ON DELETE RESTRICT,
+    screen_id INTEGER NOT NULL REFERENCES screens(screen_id) ON DELETE CASCADE,
+    show_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    ticket_price NUMERIC NOT NULL CHECK (ticket_price >= 5 AND ticket_price <= 50),
+    available_seats INTEGER NOT NULL,
+    CHECK (end_time > start_time),
+    CHECK (show_date >= CURRENT_DATE),
+    UNIQUE (screen_id, show_date, start_time)
+);
+
+--QT
+
+INSERT INTO showtimes VALUES 
+(1, 1, 101, CURRENT_DATE, '18:00', '20:30', 15.00, 200),
+(2, 2, 102, CURRENT_DATE, '19:00', '21:45', 12.50, 150),
+(3, 1, 101, CURRENT_DATE + 1, '18:00', '20:30', 15.00, 200);
+--Errors:
+INSERT INTO showtimes VALUES (4, 3, 103, CURRENT_DATE, '21:00', '20:00', 10.00, 100); -- end_time before start_time
+INSERT INTO showtimes VALUES (5, 4, 103, '2024-01-01', '15:00', '17:00', 11.00, 100); -- show_date is in the past
+INSERT INTO showtimes VALUES (6, 3, 101, CURRENT_DATE, '18:00', '20:15', 14.00, 100); -- duplicate showtime on same screen/date/time
+-- Error
+DELETE FROM movies WHERE movie_id = 1; -- movie has showtimes (ON DELETE RESTRICT)
+
+--Task4
+CREATE TABLE movie_customers (
+    customer_id INTEGER PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT NOT NULL UNIQUE,
+    phone TEXT UNIQUE,
+    date_of_birth DATE NOT NULL,
+    membership_type TEXT NOT NULL DEFAULT 'regular' CHECK (membership_type IN ('regular', 'student', 'senior', 'vip')),
+    loyalty_points INTEGER NOT NULL DEFAULT 0 CHECK (loyalty_points >= 0),
+    CHECK ( (CURRENT_DATE - date_of_birth) / 365 >= 5 )
+);
+--QT 4
+
+INSERT INTO movie_customers VALUES
+(1, 'Alice', 'Wonder', 'alice@email.com', '123-456-7890', '1995-05-10', 'vip', 500),
+(2, 'Bob', 'Builder', 'bob@email.com', '987-654-3210', '2010-02-20', 'student', 50),
+(3, ' Bob', 'Sponge', 'hi_hello@gmail.com', '770-000--2424');
