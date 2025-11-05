@@ -171,3 +171,10 @@ from departments d inner join employees e using (dept_id)
 group by d.dept_id, d.dept_name
 having avg(e.salary)>50000;
 
+-- During class
+-- the queries were deleted and replaced with instructor's own task of rewriting the 2nd problem again
+select d.dept_name, count(e.emp_id) as num_employees, avg(e.salary) as avg_salary,
+       count(p.project_id) as num_projects
+from departments d left join employees e using (dept_id)
+left join projects p using (dept_id)
+group by d.dept_id, d.dept_name;
