@@ -1,16 +1,16 @@
-CREATE TABLE departments (
+CREATE TABLE if not exists departments (
  dept_id INT PRIMARY KEY,
  dept_name VARCHAR(50),
  location VARCHAR(50)
 );
-CREATE TABLE employees (
+CREATE TABLE if not exists employees (
  emp_id INT PRIMARY KEY,
  emp_name VARCHAR(100),
  dept_id INT,
  salary DECIMAL(10,2),
  FOREIGN KEY (dept_id) REFERENCES departments(dept_id)
 );
-CREATE TABLE projects (
+CREATE TABLE if not exists projects (
  proj_id INT PRIMARY KEY,
  proj_name VARCHAR(100),
  budget DECIMAL(12,2),
@@ -131,3 +131,47 @@ from pg_indexes
 where schemaname = 'public' and indexname like '%salary%';
 
 select * from index_documentation;
+
+
+
+--TASK DURING the class
+
+CREATE TABLE users (
+ user_id INT PRIMARY KEY,
+ username VARCHAR(50),
+ full_name VARCHAR(100),
+ email VARCHAR(100),
+ account_created DATE
+);
+CREATE TABLE posts (
+ post_id INT PRIMARY KEY,
+ user_id INT,
+ content TEXT,
+ post_date TIMESTAMP,
+ likes_count INT,
+ visibility VARCHAR(20),
+ FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+CREATE TABLE comments (
+ comment_id INT PRIMARY KEY,
+ post_id INT,
+ user_id INT,
+ comment_text TEXT,
+ comment_date TIMESTAMP,
+ FOREIGN KEY (post_id) REFERENCES posts(post_id),
+ FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+--1
+create index post_idx on posts(post_date desc, visibility);
+--because it optimizes where and order clauses
+--2
+create index user_post_idx on posts(user_id, post_id);
+-- Answr YES, it indexces exact data
+--3
+create index trending_idx on posts(likes_count) where likes_count > 99;
+-- B-tree                   Incorrect, there was a choice between types of index
+
+--4
+--A: com_post_idx
+--B: Yes, because all comment_id's are already indexed. So it is quick to find a comment by searching each comment_id respect to the user_id, without creating additional index for
